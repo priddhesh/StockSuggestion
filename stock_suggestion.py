@@ -13,7 +13,7 @@ expected_price = float(input("Enter expected price to sell the share\n"))
 
 def stock_suggestion(company,price,id):
  if(choice ==1) :
-   html_text = requests.get("https://money.rediff.com/companies/market-capitalisation/nse").text
+   html_text = requests.get("https://money.rediff.com/companies/market-capitalisation/nse").text #website used to scrap data
  else :
    html_text = requests.get("https://money.rediff.com/companies/market-capitalisation").text
  soup = BeautifulSoup(html_text, 'lxml')
@@ -31,23 +31,23 @@ def stock_suggestion(company,price,id):
      k=k+1
      if k%7 == 1 :
       name = stock_name.find('a', class_="")
-      if name.text.upper().strip().replace(".","").replace(" ","")==company :
+      if name.text.upper().strip().replace(".","").replace(" ","")==company : #checks user's company name input with available companies on website
        company = name.text.strip()
        link = stock_name.find('a', href = True)
-       link = link['href']
+       link = link['href']  #link for selected company's stock for more details
        html_link = requests.get("http:"+link).text
        soup = BeautifulSoup(html_link,'lxml')
-       high_low = soup.find('span', { "id" : "highlow_nse" })
+       high_low = soup.find('span', { "id" : "highlow_nse" }) #scraps today's high/low in nse
        high_low = high_low.text
-       previous_close = soup.find('span',{"id" : "PrevClose_nse"})
+       previous_close = soup.find('span',{"id" : "PrevClose_nse"}) #scraps previous close in nse
        previous_close = previous_close.text
-       high_low_bse = soup.find('span', { "id" : "highlow" })
+       high_low_bse = soup.find('span', { "id" : "highlow" }) #scraps today's high/low in bse
        high_low_bse = high_low_bse.text
-       previous_close_bse = soup.find('span',{"id" : "PrevClose"})
+       previous_close_bse = soup.find('span',{"id" : "PrevClose"}) #scraps previous close in bse
        previous_close_bse = previous_close_bse.text
-       HL = soup.find('span',{"id" : "FiftyTwoHighlow_nse"})
+       HL = soup.find('span',{"id" : "FiftyTwoHighlow_nse"}) #scraps today's 52wk H/L in nse
        HL = HL.text
-       HL_bse = soup.find('span', {"id" : "FiftyTwoHighlow"})
+       HL_bse = soup.find('span', {"id" : "FiftyTwoHighlow"}) #scraps today's 52wk H/L in bse
        HL_bse = HL_bse.text
        news = soup.find_all('div', class_="")
        check = soup.find('h2', class_="f14 bold")
@@ -56,7 +56,7 @@ def stock_suggestion(company,price,id):
        if "Announcements" not in check :
         for new in news :
           if c>=14 and c<=16 : 
-           info = new.find('a', {'rel' : 'nofollow'})
+           info = new.find('a', {'rel' : 'nofollow'}) #scraps latest news related to company
            information.append(info.text)
           c=c+1
         for i in information :
@@ -65,7 +65,7 @@ def stock_suggestion(company,price,id):
        else :
         for acc in accs :
           if d==17 or d==19 : 
-            accouncement.append(acc.text)
+            accouncement.append(acc.text) #if news are unavailable, latest accouncements in bse are scrapped
           d=d+1 
         for j in accouncement :
           str1 += j
@@ -78,8 +78,9 @@ def stock_suggestion(company,price,id):
  for stock_name in stock_names :
         b=b+1 
         if b==a:
-            stock_price = stock_name.text.replace(",","")
- if float(stock_price)>= price :
+            stock_price = stock_name.text.replace(",","") #scraps current stock price
+ if float(stock_price)>= price : #checks whether current stock price exceeds or equals user's input price
+#templates for output display and email
   if choice == 1:
      if "Announcements" not in check :
        t = Template('''The price of the stock $stock in NSE market is Rs.$stock_price
@@ -114,9 +115,10 @@ Link : https:$link''')
   a = Template('$email')
   e = a.substitute(email=id)
   print(s)
+#code for sending email on sender's mail ID given by the user  
   ctx = ssl.create_default_context()
-  password = "rlvhxiqrigparyok" 
-  sender = "riddheshpatil.jee@gmail.com"  
+  password = "" #sender's app password
+  sender = ""   #sender's mail ID
   receiver = e
   message = s
   with smtplib.SMTP_SSL("smtp.gmail.com", port=465, context=ctx) as server:
@@ -159,8 +161,8 @@ Link : https:$link''')
 if __name__ == "__main__" :
     while True :
         stock_suggestion(company_name,expected_price,user_email)
-        time_wait = 5
+        time_wait = 5 #checks stock's details after every 5 minutes 
         print(f'Waiting {time_wait} minutes....')
         time.sleep(time_wait*60)
-
+#Submitted by Riddhesh Patil
     
